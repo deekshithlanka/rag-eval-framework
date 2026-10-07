@@ -7,8 +7,8 @@ baseline:
   embedding: gemini-embedding-001
   prompt: v1_basic
   top_k: 4
-  generator_model: gemini-2.5-flash-lite
-  judge_model: gemini-3.1-flash-lite   # newer model than the generator, so it is not grading itself
+  generator_model: gemini-3.1-flash-lite
+  judge_model: gemini-3.5-flash-lite   # newer model than the generator, so it is not grading itself
   temperature: null          # null = provider default; responses are cached for reproducibility
 
 experiments:
@@ -35,4 +35,4 @@ requests_per_minute: 30   # lower this if you hit free-tier rate limits
 # Optional: USD per 1M tokens, from https://ai.google.dev/gemini-api/docs/pricing
 # Fill in to get cost per run in the report. Leave empty to report tokens only.
 prices_per_million: {}
-#  gemini-2.5-flash-lite: {input: 0.00, output: 0.00}
+#  gemini-3.1-flash-lite: {input: 0.25, output: 1.50}

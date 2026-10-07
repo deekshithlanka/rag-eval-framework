@@ -24,8 +24,8 @@ class RunConfig:
     embedding: str = "gemini-embedding-001"
     prompt: str = "v1_basic"
     top_k: int = 4
-    generator_model: str = "gemini-2.5-flash-lite"
-    judge_model: str = "gemini-3.1-flash-lite"
+    generator_model: str = "gemini-3.1-flash-lite"
+    judge_model: str = "gemini-3.5-flash-lite"
     temperature: float | None = None
 
     def index_key(self) -> str:

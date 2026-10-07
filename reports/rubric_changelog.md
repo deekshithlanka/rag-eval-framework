@@ -24,4 +24,6 @@ Result: judge not trusted. Six pass/fail disagreements, reviewed one by one:
 
 ## v2
 
+Judge model changed to `gemini-3.5-flash-lite` for v2 because `gemini-2.5-flash-lite` (the planned generator) is no longer available to new API users; the generator is now `gemini-3.1-flash-lite`. v1 numbers above used `gemini-3.1-flash-lite` as judge.
+
 Results: run `make calibrate` and record them here.
