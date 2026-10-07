@@ -100,7 +100,7 @@ class LLMJudge:
                 context=context, question=question, answer=answer))
             unsupported = [c.get("claim", "") for c in data.get("claims", []) if not c.get("supported", True)]
             return Verdict(_clamp(data["score"]), data.get("reasoning", ""), unsupported=unsupported)
-        except Exception as e:  # malformed judge output is recorded, not hidden
+        except (ValueError, KeyError, TypeError) as e:  # malformed judge output is recorded; API errors still raise
             return Verdict(1, error=f"judge_error: {e}")
 
     def relevance(self, question: str, answer: str) -> Verdict:
@@ -110,7 +110,7 @@ class LLMJudge:
             if behavior not in {"answered", "abstained", "clarified"}:
                 behavior = "answered"
             return Verdict(_clamp(data["score"]), data.get("reasoning", ""), behavior=behavior)
-        except Exception as e:
+        except (ValueError, KeyError, TypeError) as e:
             return Verdict(1, behavior=detect_behavior(answer), error=f"judge_error: {e}")
 
 

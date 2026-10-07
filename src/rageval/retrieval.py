@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import hashlib
 import json
+import time
 from pathlib import Path
 from typing import Protocol
 
 from .corpus import Chunk
 
 CACHE = Path(".cache/index")
+EMBED_BATCH = 80      # chunks per embedding batch (free tier: 100 requests per minute)
+EMBED_PAUSE_S = 65    # seconds to wait between batches
 
 # Embedding names accepted in configs/experiments.yaml
 GEMINI_EMBEDDINGS = {"gemini-embedding-001"}
@@ -76,12 +79,22 @@ class FaissRetriever:
                 str(path), embeddings, allow_dangerous_deserialization=True  # our own cache
             )
         else:
-            self.store = FAISS.from_texts(
-                [c.as_context() for c in chunks],
-                embeddings,
-                metadatas=[{"chunk_id": c.chunk_id} for c in chunks],
-                normalize_L2=True,
-            )
+            # Embed in batches with a pause between them. The Gemini free tier
+            # allows 100 embedding requests per minute, and smaller chunk sizes
+            # produce more chunks than that.
+            texts = [c.as_context() for c in chunks]
+            metas = [{"chunk_id": c.chunk_id} for c in chunks]
+            batch = EMBED_BATCH if embedding in GEMINI_EMBEDDINGS else len(texts)
+            self.store = None
+            for start in range(0, len(texts), batch):
+                if start:
+                    print(f"  embedded {start}/{len(texts)} chunks, pausing {EMBED_PAUSE_S}s for rate limit")
+                    time.sleep(EMBED_PAUSE_S)
+                part = slice(start, start + batch)
+                if self.store is None:
+                    self.store = FAISS.from_texts(texts[part], embeddings, metadatas=metas[part], normalize_L2=True)
+                else:
+                    self.store.add_texts(texts[part], metadatas=metas[part])
             path.parent.mkdir(parents=True, exist_ok=True)
             self.store.save_local(str(path))
 
