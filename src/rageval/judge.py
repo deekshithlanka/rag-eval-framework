@@ -11,7 +11,12 @@ from dataclasses import dataclass, field
 
 from .llm import parse_json
 
-RUBRIC_VERSION = "v1"
+RUBRIC_VERSION = "v2"
+# v2 changes, from v1 calibration disagreements (see reports/rubric_changelog.md):
+#   faithfulness: incomplete or off-topic answers are not penalized (C08);
+#                 recompute arithmetic explicitly (C10); abstentions always score 5 (C13)
+#   relevance:    the judge now sees the context, so a false "I couldn't find that"
+#                 scores 1 (C13)
 PASS_THRESHOLD = 4
 
 FAITHFULNESS_SYSTEM = """You are a strict evaluator of a customer support answer.
@@ -21,6 +26,8 @@ Steps:
 1. List each factual claim in the answer (numbers, prices, limits, features, steps, yes/no statements).
 2. For each claim, decide: SUPPORTED (stated in or directly computable from the context) or UNSUPPORTED (missing from or contradicted by the context).
 3. Score using the scale below. Judge only support, not helpfulness or style.
+   Do NOT lower the score because the answer is incomplete, off-topic or skips part of the question.
+   That is relevance, which is scored separately.
 
 Scale:
 5 = every claim is supported, or the answer only says the information is not available.
@@ -29,7 +36,11 @@ Scale:
 2 = the main claim is supported but an important added claim is unsupported or contradicted.
 1 = the main claim is unsupported or contradicts the context.
 
-Arithmetic: a computed number counts as supported only if the computation is correct.
+Arithmetic: for every number the answer derives (totals, sums, percentages), recompute it yourself from
+the context values and show the calculation in the claim. If your result differs from the answer's number,
+that claim is UNSUPPORTED, even if every input number is correct.
+Abstentions: if the answer only says it could not find the information (with or without suggesting
+support), score 5. Wrongly declining is measured by a separate metric, not by faithfulness.
 Dated facts: a fact the context marks as old or replaced is unsupported if the answer presents it as current.
 
 Return only JSON: {"claims": [{"claim": "...", "supported": true}], "score": 1-5, "reasoning": "one sentence"}"""
@@ -42,7 +53,9 @@ QUESTION: {question}
 ANSWER: {answer}"""
 
 RELEVANCE_SYSTEM = """You are evaluating a customer support answer.
-Judge RELEVANCE: does the ANSWER address what the customer actually asked? Do not judge factual accuracy.
+Judge RELEVANCE: does the ANSWER address what the customer actually asked?
+Do not judge factual accuracy. An answer with wrong facts that directly addresses the question is still relevant.
+Use the CONTEXT only to check whether the answer was available.
 
 Scale:
 5 = directly and completely addresses every part of the question.
@@ -53,14 +66,18 @@ Scale:
 
 Special cases:
 - If the question depends on unstated details (for example the customer's plan) and the answer covers the cases or asks a clarifying question, that is fully relevant.
-- A clear statement that the information is not available, plus a next step, scores 4.
+- If the answer says the information is not available and the CONTEXT does not contain it, score 4.
+- If the answer says the information is not available but the CONTEXT does contain it, score 1.
 
 Also classify the answer's behavior:
 "answered" = gives an answer; "abstained" = says it cannot find or does not know; "clarified" = mainly asks a clarifying question.
 
 Return only JSON: {"score": 1-5, "behavior": "answered|abstained|clarified", "reasoning": "one sentence"}"""
 
-RELEVANCE_USER = """QUESTION: {question}
+RELEVANCE_USER = """CONTEXT:
+{context}
+
+QUESTION: {question}
 
 ANSWER: {answer}"""
 
@@ -103,9 +120,10 @@ class LLMJudge:
         except (ValueError, KeyError, TypeError) as e:  # malformed judge output is recorded; API errors still raise
             return Verdict(1, error=f"judge_error: {e}")
 
-    def relevance(self, question: str, answer: str) -> Verdict:
+    def relevance(self, question: str, answer: str, context: str = "") -> Verdict:
         try:
-            data = self._call(RELEVANCE_SYSTEM, RELEVANCE_USER.format(question=question, answer=answer))
+            data = self._call(RELEVANCE_SYSTEM, RELEVANCE_USER.format(
+                context=context, question=question, answer=answer))
             behavior = data.get("behavior", "answered")
             if behavior not in {"answered", "abstained", "clarified"}:
                 behavior = "answered"
@@ -151,7 +169,7 @@ class HeuristicJudge:
         score = 5 if worst >= 0.8 else 4 if worst >= 0.65 else 3 if worst >= 0.5 else 2 if worst >= 0.3 else 1
         return Verdict(score, f"min sentence overlap {worst:.2f}")
 
-    def relevance(self, question: str, answer: str) -> Verdict:
+    def relevance(self, question: str, answer: str, context: str = "") -> Verdict:
         behavior = detect_behavior(answer)
         if behavior == "abstained":
             return Verdict(4, "abstention", behavior=behavior)

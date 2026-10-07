@@ -86,7 +86,7 @@ def combined_config(plan: ExperimentPlan, summary: pd.DataFrame) -> RunConfig:
 def evaluate_one(q: dict, pipeline: RAGPipeline, judge) -> dict:
     out = pipeline.answer(q["question"])
     faith = judge.faithfulness(q["question"], out["context"], out["answer"])
-    rel = judge.relevance(q["question"], out["answer"])
+    rel = judge.relevance(q["question"], out["answer"], out["context"])
     record = {
         "id": q["id"],
         "type": q["type"],

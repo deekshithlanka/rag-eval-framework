@@ -44,7 +44,7 @@ def main(argv=None) -> None:
     for it in items:
         context = "\n\n---\n\n".join(f"[{d}] {docs[d].title}\n{docs[d].text}" for d in it["context_doc_ids"])
         f = judge.faithfulness(it["question"], context, it["answer"])
-        r = judge.relevance(it["question"], it["answer"])
+        r = judge.relevance(it["question"], it["answer"], context)
         rows.append({
             "id": it["id"],
             "human_f": it["human"]["faithfulness"], "judge_f": f.score,
