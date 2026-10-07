@@ -92,7 +92,7 @@ tests/           offline tests
 ## Design choices
 
 - **Gates before results.** Thresholds live in the config and were set first, so the decision cannot be tuned to the data.
-- **Judge model differs from the generator** (`gemini-3.5-flash` judges `gemini-3.1-flash-lite`) to reduce self-preference.
+- **Judge model differs from the generator** (`gemini-3.1-flash-lite` judges `gemini-2.5-flash-lite`) to reduce self-preference.
 - **Hard cases on purpose.** The corpus has an outdated price page that conflicts with the current one, plan-dependent limits, and look-alike numbers (120 vs 600 API requests per minute) to test whether the bot grounds answers or pattern-matches.
 - **Unanswerable does not mean refuse.** "Enterprise pricing is custom" is a safe answer; "$199 a month" is not. The safe rate counts either a refusal or a fully supported answer.
 - **Lexical baseline.** TF-IDF is included in the embedding experiment so gains from neural embeddings are measured against something cheap.
