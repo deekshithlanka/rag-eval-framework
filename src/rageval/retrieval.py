@@ -44,13 +44,53 @@ class TfidfRetriever:
         return [(self.chunks[i], float(scores[i])) for i in order]
 
 
+def _is_rate_limit(err: Exception) -> bool:
+    msg = str(err)
+    return "429" in msg or "RESOURCE_EXHAUSTED" in msg
+
+
+def _with_retry(fn, what: str, attempts: int = 8):
+    """Retry on per-minute rate limits. A daily quota still fails after the last attempt."""
+    for i in range(attempts):
+        try:
+            return fn()
+        except Exception as e:  # noqa: BLE001
+            if not _is_rate_limit(e) or i == attempts - 1:
+                raise
+            wait = 30 + 15 * i
+            print(f"  rate limited on {what}, waiting {wait}s (attempt {i + 1}/{attempts})")
+            time.sleep(wait)
+
+
+def _cached_embeddings(inner, name: str):
+    """Wrap an embedding model with a disk cache for queries and rate-limit retries."""
+    from langchain_core.embeddings import Embeddings
+
+    qcache = Path(".cache/query_embeddings")
+
+    class CachedEmbeddings(Embeddings):
+        def embed_documents(self, texts):
+            return _with_retry(lambda: inner.embed_documents(texts), "document embeddings")
+
+        def embed_query(self, text):
+            path = qcache / (hashlib.sha256(f"{name}|{text}".encode()).hexdigest() + ".json")
+            if path.exists():
+                return json.loads(path.read_text())
+            vec = _with_retry(lambda: inner.embed_query(text), "query embedding")
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(vec))
+            return vec
+
+    return CachedEmbeddings()
+
+
 def make_embeddings(name: str):
     if name in GEMINI_EMBEDDINGS:
         from dotenv import load_dotenv
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
         load_dotenv()
-        return GoogleGenerativeAIEmbeddings(model=name)
+        return _cached_embeddings(GoogleGenerativeAIEmbeddings(model=name), name)
     if name in HF_EMBEDDINGS:
         from langchain_huggingface import HuggingFaceEmbeddings
 
