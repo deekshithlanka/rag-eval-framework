@@ -1,5 +1,7 @@
 # RAG Eval Framework: should this support bot ship?
 
+**[View the case study site](https://claude.ai/artifact/HXoaNEXqsJBtq8QyeZJPBc)**
+
 An evaluation harness for a retrieval-augmented support assistant. It answers one product question with evidence: **which configuration is safe to launch, and how do we know?**
 
 | | |

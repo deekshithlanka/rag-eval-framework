@@ -1,0 +1,253 @@
+<title>ShipCheck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an inspection report. Hero with thesis + vertical demo at right, then problem, user, competitors, the three-step method, and the launch gate sheet. */
+:root{
+  --paper:#eef1f5;
+  --sheet:#ffffff;
+  --ink:#16213a;
+  --muted:#56617a;
+  --rule:#c9d0dc;
+  --stamp:#e3a008;
+  --stamp-ink:#3b2a00;
+  --pass:#1f7a4d;
+  --fail:#b42318;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f1524; --sheet:#172036; --ink:#e6ebf5; --muted:#9aa6bf; --rule:#2c3852;
+    --stamp:#f0b429; --stamp-ink:#2a1d00; --pass:#4cc38a; --fail:#ff7a6b; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f1524; --sheet:#172036; --ink:#e6ebf5; --muted:#9aa6bf; --rule:#2c3852;
+  --stamp:#f0b429; --stamp-ink:#2a1d00; --pass:#4cc38a; --fail:#ff7a6b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.6;padding-inline:20px;padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+a{color:inherit;text-decoration-color:var(--stamp);text-decoration-thickness:2px;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--stamp);outline-offset:3px}
+h1,h2,h3{font-family:var(--display);line-height:1.1;text-wrap:balance;margin:0}
+p{margin:0}
+.label{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* top bar */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-block:22px;border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em}
+.brand span{display:inline-block;background:var(--stamp);color:var(--stamp-ink);padding:0 6px;margin-left:2px;transform:rotate(-2deg)}
+.bar nav{display:flex;gap:20px;flex-wrap:wrap;font-family:var(--mono);font-size:13px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:56px;align-items:start;padding-block:56px 48px}
+.hero h1{font-size:clamp(40px,6vw,72px);font-weight:800;letter-spacing:-.03em}
+.hero h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--stamp) 62%);padding:0 2px}
+.lede{font-size:21px;margin-top:22px;max-width:34em;color:var(--ink)}
+.meta{display:flex;gap:28px;flex-wrap:wrap;margin-top:32px;font-family:var(--mono);font-size:14px}
+.meta div{display:grid;gap:2px}
+.meta b{font-size:26px;font-family:var(--display);font-weight:700;font-variant-numeric:tabular-nums}
+.cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+.btn{font-family:var(--mono);font-size:14px;padding:12px 18px;border:2px solid var(--ink);text-decoration:none;font-weight:600}
+.btn.primary{background:var(--ink);color:var(--paper)}
+
+/* video */
+.phone{width:100%;max-width:300px;aspect-ratio:9/16;background:var(--ink);border-radius:28px;padding:10px;box-shadow:0 24px 50px -24px rgba(10,20,40,.45);justify-self:end}
+.phone video,.phone .ph{width:100%;height:100%;border-radius:20px;object-fit:cover;background:#0b1020;display:block}
+.phone .ph{display:grid;place-items:center;text-align:center;color:#c9d2e6;padding:24px;font-family:var(--mono);font-size:13px;background:repeating-linear-gradient(135deg,#111a30 0 14px,#0d1427 14px 28px)}
+.ph .play{width:64px;height:64px;border-radius:50%;border:2px solid var(--stamp);display:grid;place-items:center;margin:0 auto 14px}
+.ph .play::after{content:"";border-left:18px solid var(--stamp);border-top:11px solid transparent;border-bottom:11px solid transparent;margin-left:5px}
+.vcap{margin-top:12px;text-align:center}
+
+/* sections */
+section{padding-block:48px;border-top:1px solid var(--rule)}
+.two{display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+.two h2{font-size:28px;font-weight:700}
+.prose{display:grid;gap:16px;max-width:40em}
+.quote{border-left:4px solid var(--stamp);padding:6px 0 6px 18px;font-size:20px;font-style:italic}
+
+/* competitors */
+.comp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:8px}
+.card{background:var(--sheet);border:1px solid var(--rule);padding:22px;display:grid;gap:12px;align-content:start}
+.card h3{font-size:22px}
+.card .good,.card .gap{font-size:16px}
+.card .gap{border-top:1px dashed var(--rule);padding-top:12px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.tag.g{color:var(--pass)} .tag.x{color:var(--fail)}
+
+/* steps */
+.steps{display:grid;gap:0;counter-reset:s;margin-top:8px}
+.step{display:grid;grid-template-columns:72px minmax(0,1fr);gap:20px;padding-block:22px;border-bottom:1px solid var(--rule)}
+.step:last-child{border-bottom:0}
+.step .n{font-family:var(--display);font-weight:800;font-size:44px;line-height:1;color:var(--stamp)}
+.step h3{font-size:22px;margin-bottom:6px}
+.insight{background:var(--ink);color:var(--paper);padding:24px 26px;font-size:20px;margin-bottom:28px}
+
+/* gate sheet */
+.sheet{background:var(--sheet);border:1px solid var(--rule);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:14px;min-width:560px}
+th,td{text-align:left;padding:14px 18px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+tr:last-child td{border-bottom:0}
+.note{margin-top:16px;font-size:15px;color:var(--muted);max-width:44em}
+.pending{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:var(--stamp);color:var(--stamp-ink);padding:4px 10px;font-weight:600}
+
+footer{border-top:1px solid var(--rule);padding-top:28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--muted)}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:36px}
+  .phone{justify-self:center}
+  .two{grid-template-columns:1fr;gap:16px}
+  .comp{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  body{font-size:17px;padding-inline:16px}
+  .lede{font-size:19px}
+  .step{grid-template-columns:48px minmax(0,1fr);gap:14px}
+  .step .n{font-size:34px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .brand span{transition:transform .2s} .brand:hover span{transform:rotate(2deg)}
+}
+</style>
+
+<div class="wrap">
+  <header class="bar">
+    <div class="brand">Ship<span>Check</span></div>
+    <nav aria-label="Sections">
+      <a href="#problem">Problem</a>
+      <a href="#competitors">Competitors</a>
+      <a href="#solution">Solution</a>
+      <a href="#gates">Launch gates</a>
+      <a href="https://github.com/deekshithlanka/rag-eval-framework">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <p class="label">Product case study · AI evaluation</p>
+      <h1 style="margin-top:14px">Is your AI support bot <em>safe to launch?</em></h1>
+      <p class="lede">ShipCheck is an evaluation harness that tells a team whether its AI support assistant is safe to launch, with numbers instead of gut feel.</p>
+      <div class="meta">
+        <div><b>49</b><span class="label">test questions</span></div>
+        <div><b>15</b><span class="label">human labels</span></div>
+        <div><b>3</b><span class="label">experiments</span></div>
+        <div><b>5</b><span class="label">launch gates</span></div>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="https://github.com/deekshithlanka/rag-eval-framework">View the code</a>
+        <a class="btn" href="https://github.com/deekshithlanka/rag-eval-framework/blob/main/reports/sample_mock_report.md">Sample report</a>
+      </div>
+    </div>
+
+    <figure style="margin:0;justify-self:end;width:100%;max-width:300px">
+      <div class="phone">
+        <video id="demo" src="demo.mp4" controls playsinline preload="metadata" aria-label="ShipCheck demo video"></video>
+        <div class="ph" id="ph" hidden>
+          <div><div class="play" aria-hidden="true"></div>Demo video<br>coming soon</div>
+        </div>
+      </div>
+      <figcaption class="label vcap">60-second walkthrough</figcaption>
+    </figure>
+  </div>
+
+  <section id="problem" class="two">
+    <h2>The problem</h2>
+    <div class="prose">
+      <p>A team builds an AI support bot, tries 10 questions in a demo, and it looks great. Then a customer asks about pricing and the bot confidently quotes a price that changed months ago.</p>
+      <p class="quote">AI answers sound right even when they're wrong.</p>
+      <p>That is what makes this hard to catch. Checking hundreds of answers by hand after every change to a prompt, model or document set isn't realistic. So teams launch on gut feel.</p>
+    </div>
+  </section>
+
+  <section id="user" class="two">
+    <h2>Who it's for</h2>
+    <div class="prose">
+      <p>The <strong>product manager responsible for launching an AI support assistant</strong>.</p>
+      <p>They need to decide whether it's ready and which setup to ship, then defend that call to engineering, legal and support leaders. If they get it wrong, customers get wrong answers about money, and trust in the product drops.</p>
+    </div>
+  </section>
+
+  <section id="competitors">
+    <div class="two" style="margin-bottom:28px">
+      <h2>Competitors</h2>
+      <p class="prose">Good evaluation tools exist. Each one gives a team scores. None of them hands a PM a launch decision they can defend.</p>
+    </div>
+    <div class="comp">
+      <article class="card">
+        <p class="label"><a href="https://docs.ragas.io/">docs.ragas.io</a></p>
+        <h3>RAGAS</h3>
+        <p class="good"><span class="tag g">Does well</span><br>Open-source library with ready-made metrics like faithfulness and answer relevancy. Quick way to score a RAG system.</p>
+        <p class="gap"><span class="tag x">Gap</span><br>It gives you scores, not a decision. Nothing tells you whether 82% faithfulness means ship or don't ship.</p>
+      </article>
+      <article class="card">
+        <p class="label"><a href="https://www.langchain.com/langsmith">langchain.com/langsmith</a></p>
+        <h3>LangSmith</h3>
+        <p class="good"><span class="tag g">Does well</span><br>LangChain's platform for tracing, datasets and evaluations, with team dashboards.</p>
+        <p class="gap"><span class="tag x">Gap</span><br>Powerful but general-purpose. The team still designs its own test set, launch thresholds and checks on the AI judge.</p>
+      </article>
+      <article class="card">
+        <p class="label"><a href="https://deepeval.com/">deepeval.com</a></p>
+        <h3>DeepEval</h3>
+        <p class="good"><span class="tag g">Does well</span><br>Open-source framework that runs LLM tests like software unit tests.</p>
+        <p class="gap"><span class="tag x">Gap</span><br>Built for engineers in CI pipelines, not for a PM making and explaining a launch decision.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="solution">
+    <div class="two">
+      <h2>My solution</h2>
+      <div>
+        <p class="insight">An AI judge is only useful if you know it agrees with people. Metrics only matter if the launch bar is set before you see results.</p>
+        <p class="label" style="margin-bottom:4px">ShipCheck runs three steps, in this order</p>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><div><h3>Check the judge first</h3><p>Compares the AI judge against hand-labeled answers and refuses to recommend anything if they disagree (Cohen's kappa below 0.6).</p></div></div>
+          <div class="step"><div class="n">2</div><div><h3>Test one change at a time</h3><p>Runs controlled experiments on chunk size, embedding model and prompt against a 49-question test set, including trick questions with no answer in the docs.</p></div></div>
+          <div class="step"><div class="n">3</div><div><h3>Make the call</h3><p>Produces one report with a clear ship or don't-ship decision against 5 launch gates set in advance.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gates">
+    <div class="two" style="margin-bottom:24px">
+      <h2>Launch gates</h2>
+      <p class="prose">Set in the config before any results existed, so the bar can't be moved to fit the data. A configuration ships only if it clears all five.</p>
+    </div>
+    <div class="sheet">
+      <table>
+        <thead><tr><th>Gate</th><th>Bar</th><th>The question it answers</th></tr></thead>
+        <tbody>
+          <tr><td>Faithfulness</td><td class="num">≥ 90%</td><td>Is every claim backed by the retrieved docs?</td></tr>
+          <tr><td>Relevance</td><td class="num">≥ 85%</td><td>Does the answer address what was asked?</td></tr>
+          <tr><td>Unanswerable safe</td><td class="num">≥ 80%</td><td>When the docs lack the answer, does it avoid inventing one?</td></tr>
+          <tr><td>False abstention</td><td class="num">≤ 10%</td><td>How often does it refuse a question it could answer?</td></tr>
+          <tr><td>Retrieval recall@k</td><td class="num">≥ 85%</td><td>Are the right docs in the top results?</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note"><span class="pending">Results pending</span> The full Gemini run is in progress. Experiment results and the final ship decision will appear here when it finishes.</p>
+  </section>
+
+  <footer>
+    <span>ShipCheck · built by deekshithlanka</span>
+    <span>Python · LangChain · FAISS · Gemini</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var v=document.getElementById('demo'), ph=document.getElementById('ph');
+  function fallback(){ v.hidden=true; ph.hidden=false; }
+  v.addEventListener('error',fallback,true);
+  var src=v.querySelector('source')||v;
+  src.addEventListener && src.addEventListener('error',fallback);
+  setTimeout(function(){ if(v.readyState===0 && v.networkState===3) fallback(); },2500);
+})();
+</script>
