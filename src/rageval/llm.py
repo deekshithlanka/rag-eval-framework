@@ -46,7 +46,7 @@ class GeminiChat:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         load_dotenv()
-        kwargs = {"model": model, "max_retries": 6}
+        kwargs = {"model": model, "max_retries": 0}  # retries handled in _invoke_with_retry
         if temperature is not None:
             kwargs["temperature"] = temperature
         self.model = model
@@ -58,6 +58,26 @@ class GeminiChat:
         h = hashlib.sha256(json.dumps([self.model, self.temperature, system, user]).encode()).hexdigest()
         return CACHE / f"{h}.json"
 
+    def _invoke_with_retry(self, messages, attempts: int = 10):
+        for i in range(attempts):
+            self.limiter.wait()
+            start = time.perf_counter()
+            try:
+                msg = self.client.invoke(messages)
+                return msg, time.perf_counter() - start
+            except Exception as e:  # noqa: BLE001
+                kind = _rate_limit_kind(e)
+                if kind == "day":
+                    raise SystemExit(
+                        f"Daily free-tier quota used up for {self.model}. Rerun tomorrow (saved work is reused) "
+                        "or add billing at aistudio.google.com/apikey."
+                    ) from e
+                if kind != "minute" or i == attempts - 1:
+                    raise
+                wait = _retry_delay(e)
+                print(f"  {self.model} rate limited, waiting {wait:.0f}s (attempt {i + 1}/{attempts})")
+                time.sleep(wait)
+
     def complete(self, system: str, user: str) -> LLMResult:
         path = self._key(system, user)
         if path.exists():
@@ -66,10 +86,7 @@ class GeminiChat:
 
         from langchain_core.messages import HumanMessage, SystemMessage
 
-        self.limiter.wait()
-        start = time.perf_counter()
-        msg = self.client.invoke([SystemMessage(content=system), HumanMessage(content=user)])
-        latency = time.perf_counter() - start
+        msg, latency = self._invoke_with_retry([SystemMessage(content=system), HumanMessage(content=user)])
         usage = getattr(msg, "usage_metadata", None) or {}
         text = msg.content if isinstance(msg.content, str) else "".join(
             part.get("text", "") if isinstance(part, dict) else str(part) for part in msg.content
@@ -83,6 +100,21 @@ class GeminiChat:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(asdict(result)))
         return result
+
+
+def _rate_limit_kind(err: Exception) -> str | None:
+    """'minute' for per-minute limits (worth waiting), 'day' for daily quotas (stop), else None."""
+    msg = str(err)
+    if "429" in msg or "RESOURCE_EXHAUSTED" in msg:
+        return "day" if "PerDay" in msg else "minute"
+    if any(code in msg for code in ("503", "UNAVAILABLE", "500 INTERNAL", "DEADLINE_EXCEEDED")):
+        return "minute"  # transient server errors: wait and retry
+    return None
+
+
+def _retry_delay(err: Exception, default: float = 30.0) -> float:
+    match = re.search(r"retry in ([0-9.]+)s", str(err))
+    return float(match.group(1)) + 2 if match else default
 
 
 def parse_json(text: str) -> dict:

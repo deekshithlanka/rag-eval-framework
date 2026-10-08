@@ -30,7 +30,7 @@ ship_gates:
   false_abstention_rate: 0.10    # answerable questions the bot wrongly declined (max)
   retrieval_recall_at_k: 0.85    # golden source docs found in the top-k chunks
 
-requests_per_minute: 30   # lower this if you hit free-tier rate limits
+requests_per_minute: 12   # per model; Gemini free tier allows 15 for flash-lite models
 
 # Optional: USD per 1M tokens, from https://ai.google.dev/gemini-api/docs/pricing
 # Fill in to get cost per run in the report. Leave empty to report tokens only.
