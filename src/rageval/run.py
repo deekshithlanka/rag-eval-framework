@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
@@ -142,8 +143,19 @@ def main(argv=None) -> None:
         print(f"> {cfg.name}: {len(golden)} questions")
         pipeline = RAGPipeline(cfg, factory.retriever(cfg), factory.generator(cfg))
         judge = factory.judge(cfg)
+        done = [0]
+        lock = threading.Lock()
+
+        def run_one(q):
+            rec = evaluate_one(q, pipeline, judge)
+            with lock:
+                done[0] += 1
+                if done[0] % 10 == 0 or done[0] == len(golden):
+                    print(f"  {done[0]}/{len(golden)} questions done", flush=True)
+            return rec
+
         with ThreadPoolExecutor(max_workers=1 if args.mock else args.workers) as pool:
-            records = list(pool.map(lambda q: evaluate_one(q, pipeline, judge), golden))
+            records = list(pool.map(run_one, golden))
         (out_dir / "runs" / f"{cfg.name}.jsonl").write_text(
             "\n".join(json.dumps(r) for r in records) + "\n"
         )
