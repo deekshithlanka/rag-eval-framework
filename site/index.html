@@ -95,6 +95,8 @@ th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted
 td.num{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 tr:last-child td{border-bottom:0}
 .note{margin-top:16px;font-size:15px;color:var(--muted);max-width:44em}
+.stamp-no{display:inline-block;font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02em;text-transform:uppercase;color:var(--fail);border:4px solid var(--fail);padding:4px 16px;transform:rotate(-2deg)}
+.ok{color:var(--pass);font-weight:600} .bad{color:var(--fail);font-weight:600}
 .pending{display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;background:var(--stamp);color:var(--stamp-ink);padding:4px 10px;font-weight:600}
 
 footer{border-top:1px solid var(--rule);padding-top:28px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:13px;color:var(--muted)}
@@ -124,6 +126,7 @@ footer{border-top:1px solid var(--rule);padding-top:28px;display:flex;justify-co
       <a href="#competitors">Competitors</a>
       <a href="#solution">Solution</a>
       <a href="#gates">Launch gates</a>
+      <a href="#results">Results</a>
       <a href="https://github.com/deekshithlanka/rag-eval-framework">GitHub</a>
     </nav>
   </header>
@@ -136,12 +139,12 @@ footer{border-top:1px solid var(--rule);padding-top:28px;display:flex;justify-co
       <div class="meta">
         <div><b>49</b><span class="label">test questions</span></div>
         <div><b>15</b><span class="label">human labels</span></div>
-        <div><b>3</b><span class="label">experiments</span></div>
+        <div><b>8</b><span class="label">configs tested</span></div>
         <div><b>5</b><span class="label">launch gates</span></div>
       </div>
       <div class="cta">
         <a class="btn primary" href="https://github.com/deekshithlanka/rag-eval-framework">View the code</a>
-        <a class="btn" href="https://github.com/deekshithlanka/rag-eval-framework/blob/main/reports/sample_mock_report.md">Sample report</a>
+        <a class="btn" href="https://github.com/deekshithlanka/rag-eval-framework/blob/main/reports/eval_report.md">Full report</a>
       </div>
     </div>
 
@@ -232,7 +235,34 @@ footer{border-top:1px solid var(--rule);padding-top:28px;display:flex;justify-co
         </tbody>
       </table>
     </div>
-    <p class="note"><span class="pending">Results pending</span> The full Gemini run is in progress. Experiment results and the final ship decision will appear here when it finishes.</p>
+  </section>
+
+  <section id="results">
+    <div class="two" style="margin-bottom:24px">
+      <h2>The verdict</h2>
+      <div class="prose">
+        <p><span class="stamp-no">Do not ship yet</span></p>
+        <p>All 8 configurations cleared the five gates on the judge's scores. ShipCheck still refused to make the call, because the AI judge only agreed with human labels on one of its two rubrics.</p>
+      </div>
+    </div>
+    <div class="sheet" style="margin-bottom:28px">
+      <table>
+        <thead><tr><th>Judge rubric</th><th>Agreement (kappa)</th><th>Bar</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Faithfulness</td><td class="num">0.60 → 0.86</td><td class="num">0.6</td><td class="ok">Trusted after rubric v2</td></tr>
+          <tr><td>Relevance</td><td class="num">0.33 → 0.38</td><td class="num">0.6</td><td class="bad">Not trusted</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <h2>What I learned</h2>
+      <div class="prose">
+        <p><strong>Grounding trades invented facts for false refusals.</strong> Grounded prompts raised the safe rate on unanswerable questions from 89% to 100%, then refused a question the bot had just answered correctly. A launch bar needs both metrics.</p>
+        <p><strong>Retrieval misses become wrong answers.</strong> Keyword search had 92% recall against 97% for Gemini embeddings, and its one miss told an EU customer they could use a feature their plan doesn't include.</p>
+        <p><strong>My own fix created a new judge bug.</strong> Giving the relevance judge the docs, to catch wrong refusals, made it start scoring accuracy instead of relevance. Calibration caught it before any number reached a launch decision.</p>
+        <p><a href="https://github.com/deekshithlanka/rag-eval-framework/blob/main/reports/findings.md">Read the full findings</a></p>
+      </div>
+    </div>
   </section>
 
   <footer>

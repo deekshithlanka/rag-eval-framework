@@ -12,16 +12,20 @@ An evaluation harness for a retrieval-augmented support assistant. It answers on
 | **Judges** | LLM-as-judge rubrics for faithfulness and relevance, calibrated against 15 hand-labeled answers |
 | **Experiments** | Chunk size, embedding model, prompt variant. One variable at a time, then a confirmation run |
 | **Decision rule** | 5 launch gates set before any results were seen |
-| **Output** | [`reports/eval_report.md`](reports/eval_report.md): results tables, CIs, and a ship or no-ship call |
+| **Output** | [`reports/eval_report.md`](reports/eval_report.md): results tables, CIs, and a ship or no-ship call. [`reports/findings.md`](reports/findings.md): analysis |
 
 ## Results
 
-Run `make all` to generate the report. Until then, see the format in [`reports/sample_mock_report.md`](reports/sample_mock_report.md), produced offline with stand-in components (its numbers are not meaningful).
+8 configurations x 49 questions, judged by `gemini-3.5-flash-lite`. Full report: [`reports/eval_report.md`](reports/eval_report.md). Analysis: [`reports/findings.md`](reports/findings.md).
 
-<!-- After your run, replace this block with 3 lines from reports/eval_report.md:
-**Recommendation:** Ship `<run>` (faithfulness X% vs Y% baseline, +Z pp, 95% CI ...).
-**Biggest lever:** ...
-**Judge agreement with humans:** kappa ... -->
+**Decision: do not ship yet.** All 8 configurations clear the launch gates on the judge's scores, but the judge only agrees with human labels on one of its two rubrics (faithfulness kappa 0.86, relevance 0.38, bar 0.6). The harness refuses to make a launch call on unverified scores.
+
+| Finding | Evidence |
+|---|---|
+| Grounded prompts eliminated the one invented fact, but added false refusals | Unanswerable-safe rate 89% to 100%; v2 refused a FreshBooks question it had just answered correctly |
+| Retrieval misses become wrong answers | TF-IDF recall 92% vs 97% for Gemini embeddings; its miss on Q31 told an EU customer on Scale they could use EU data residency |
+| Chunk size barely matters on this corpus | Faithfulness 98 to 100% across 400, 800 and 1600 characters; all CIs include zero |
+| Calibration caught and fixed judge problems | Faithfulness agreement 0.60 to 0.86 after rubric v2; relevance still fails and the cause is documented in [`rubric_changelog.md`](reports/rubric_changelog.md) |
 
 ## What it measures
 

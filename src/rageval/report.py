@@ -102,7 +102,12 @@ def build(results: Path = ROOT / "results", reports: Path = ROOT / "reports") ->
         L += [f"**Do not ship yet.** Reason: {why}.", ""]
         best = summary.sort_values("faithfulness_pass_rate", ascending=False).iloc[0]
         failing = [METRIC_LABELS[k] for k, ok in check_gates(best.to_dict(), gates).items() if not ok]
-        L += [f"Closest run: `{best['run']}`. Gates still failing: {', '.join(failing) or 'none'}.", ""]
+        if failing:
+            L += [f"Closest run: `{best['run']}`. Gates still failing: {', '.join(failing)}.", ""]
+        else:
+            n_pass = int(summary["passes_all_gates"].sum())
+            L += [f"{n_pass} of {len(summary)} runs clear all five gates on the judge's scores, but those scores "
+                  "are not verified until the judge clears calibration.", ""]
 
     # 2. Gate table
     show = [base] + ([pick] if pick and pick != base else [])
@@ -140,8 +145,8 @@ def build(results: Path = ROOT / "results", reports: Path = ROOT / "reports") ->
         if not present:
             continue
         L += [f"### {exp_name}", "",
-              "| Run | Recall@k | MRR | Faithful | Relevant | Unanswerable safe | False abstain | p50 latency | Gen tokens | Faithful vs baseline |",
-              "|---|---|---|---|---|---|---|---|---|---|"]
+              "| Run | Recall@k | MRR | Faithful | Relevant | Unanswerable safe | False abstain | Faithful vs baseline |",
+              "|---|---|---|---|---|---|---|---|"]
         for rn in present:
             row = by_name.loc[rn]
             if rn == base:
@@ -149,12 +154,9 @@ def build(results: Path = ROOT / "results", reports: Path = ROOT / "reports") ->
             else:
                 d, lo, hi = paired(runs, base, rn, "faithfulness")
                 delta = f"{pp(d)} [{pp(lo)}, {pp(hi)}]"
-            tokens = int(row.gen_input_tokens + row.gen_output_tokens)
-            c = cost(row, prices, meta["runs"][rn]["generator_model"])
-            tok = f"{tokens:,}" + (f" (${c:.3f})" if c is not None else "")
             L.append(f"| `{rn}` | {pct(row.retrieval_recall_at_k)} | {row.retrieval_mrr:.2f} | {pct(row.faithfulness_pass_rate)} | "
                      f"{pct(row.relevance_pass_rate)} | {pct(row.unanswerable_safe_rate)} | {pct(row.false_abstention_rate)} | "
-                     f"{row.latency_p50_s:.2f}s | {tok} | {delta} |")
+                     f"{delta} |")
         winner = max(present, key=lambda r: (by_name.loc[r, "faithfulness_pass_rate"], by_name.loc[r, "relevance_pass_rate"]))
         L += ["", f"Best on faithfulness (ties broken by relevance): `{winner}`.", ""]
 
@@ -194,7 +196,7 @@ def build(results: Path = ROOT / "results", reports: Path = ROOT / "reports") ->
           "- Synthetic corpus and a single labeler. Real tickets would be messier.",
           "- About 50 questions limits statistical power; treat small deltas as directional.",
           "- The judge model is from the same provider as the generator, which can bias scores. Calibration checks this only on 15 items.",
-          "- Latency includes API network time and varies by run.", ""]
+          "- Latency and token cost are not compared across runs: responses are cached and reused between runs, and free-tier rate limits add waits, so neither number is comparable here.", ""]
     text = "\n".join(L)
     (reports / "eval_report.md").write_text(text)
     return text

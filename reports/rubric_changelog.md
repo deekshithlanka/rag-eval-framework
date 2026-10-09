@@ -26,4 +26,18 @@ Result: judge not trusted. Six pass/fail disagreements, reviewed one by one:
 
 Judge model changed to `gemini-3.5-flash-lite` for v2 because `gemini-2.5-flash-lite` (the planned generator) is no longer available to new API users; the generator is now `gemini-3.1-flash-lite`. v1 numbers above used `gemini-3.1-flash-lite` as judge.
 
-Results: run `make calibrate` and record them here.
+| Rubric | Exact agreement | Pass/fail kappa | Bar |
+|---|---|---|---|
+| Faithfulness | 87% | 0.86 | 0.6, met |
+| Relevance | 47% | 0.38 | 0.6, missed |
+
+Faithfulness is now trusted. Relevance is not. Remaining disagreements:
+
+| ID | Rubric | Human | Judge | Cause |
+|---|---|---|---|---|
+| C04, C05, C12, C15 | Relevance | 4 or 5 | 1 | Giving the relevance judge the context (added in v2) made it score wrong-but-on-topic answers as irrelevant. The fix for C13 created this regression. |
+| C10 | Faithfulness | 3 | 5 | The judge computed $29 + 2 x $8 as $43, matching the answer's error. |
+
+## Proposed v3 (not yet run)
+
+Judge relevance without the context. Only when the answer declines, run a separate yes/no check against the context to catch wrong refusals. Validate on new held-out labels rather than the same 15.

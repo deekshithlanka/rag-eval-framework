@@ -1,0 +1,208 @@
+{
+  "mock": false,
+  "rubric_version": "v2",
+  "judge_model": "gemini-3.5-flash-lite",
+  "n": 15,
+  "labelers": [
+    "deekshithlanka"
+  ],
+  "faithfulness": {
+    "exact_agreement": 0.8666666666666667,
+    "within_1_agreement": 0.9333333333333333,
+    "pass_fail_agreement": 0.9333333333333333,
+    "pass_fail_kappa": 0.8648648648648649,
+    "weighted_kappa": 0.9508196721311475
+  },
+  "relevance": {
+    "exact_agreement": 0.4666666666666667,
+    "within_1_agreement": 0.7333333333333333,
+    "pass_fail_agreement": 0.7333333333333333,
+    "pass_fail_kappa": 0.375,
+    "weighted_kappa": 0.3272425249169436
+  },
+  "behavior_agreement": 1.0,
+  "kappa_bar": 0.6,
+  "rows": [
+    {
+      "id": "C01",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim in the answer is directly supported by the provided context.",
+      "judge_r_reason": "The answer directly and completely states that the password reset link is valid for 60 minutes, matching the provided context.",
+      "note": "Fully supported and direct."
+    },
+    {
+      "id": "C02",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim in the answer is directly supported by the context.",
+      "judge_r_reason": "The answer directly and completely addresses the customer's question about the annual cost of the Growth plan using the provided context.",
+      "note": "Both numbers match BIL-01."
+    },
+    {
+      "id": "C03",
+      "human_f": 1,
+      "judge_f": 1,
+      "human_r": 4,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The answer claims that the annual Growth plan costs $20 per month, which refers to the old pre-July 1, 2026 pricing in BIL-06, whereas the current price listed in BIL-01 is $24 per month.",
+      "judge_r_reason": "The answer directly provides the annual cost for the Growth plan, referencing the pre-July 1, 2026 pricing available in the context.",
+      "note": "Uses the pre-July 2026 price from BIL-06 as if current. Context mentions $20 but only as the old price, so the claim as stated is unsupported."
+    },
+    {
+      "id": "C04",
+      "human_f": 1,
+      "judge_f": 1,
+      "human_r": 4,
+      "judge_r": 1,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The answer states the Scale plan limit is 600 requests per minute, but the context explicitly states it is 120 requests per minute for the Scale plan and 600 for the Enterprise plan.",
+      "judge_r_reason": "The answer contradicts the context by stating the Scale plan has 600 requests per minute when the context specifies 120.",
+      "note": "600 is the Enterprise limit; Scale is 120."
+    },
+    {
+      "id": "C05",
+      "human_f": 1,
+      "judge_f": 1,
+      "human_r": 4,
+      "judge_r": 1,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The context explicitly states that Ledgerly does not support SMS codes for 2FA, directly contradicting the answer.",
+      "judge_r_reason": "The answer directly contradicts the provided context which states that SMS codes are not supported.",
+      "note": "Directly contradicts the context."
+    },
+    {
+      "id": "C06",
+      "human_f": 2,
+      "judge_f": 2,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The main claim that the sync is one-way is supported, but the added claim that QuickBooks Desktop is supported with a connector directly contradicts the context which states QuickBooks Desktop is not supported.",
+      "judge_r_reason": "The answer directly addresses whether the sync is two-way, even though it includes hallucinated information regarding QuickBooks Desktop not found in the context.",
+      "note": "First sentence is supported; the Desktop claim contradicts the doc."
+    },
+    {
+      "id": "C07",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim in the answer is directly supported by the provided context.",
+      "judge_r_reason": "The answer directly and completely addresses both the cost ($15 fee) and the response time (7 days) asked by the customer.",
+      "note": "Fully supported."
+    },
+    {
+      "id": "C08",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 2,
+      "judge_r": 3,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim made in the answer is directly supported by the context.",
+      "judge_r_reason": "The answer addresses how long you have to decide (though it misses the response deadline of 7 days and incorrectly mentions the card network decision time) and states the cost is not mentioned explicitly, making it only a partial answer.",
+      "note": "Faithful but does not answer either part of the question."
+    },
+    {
+      "id": "C09",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim is directly supported by the context, and the math ($29 + 2 * $8 = $45) is correct.",
+      "judge_r_reason": "The answer completely and accurately calculates the monthly bill based on the plan, user counts, and pricing rules provided in the context.",
+      "note": "Correct arithmetic from supported numbers."
+    },
+    {
+      "id": "C10",
+      "human_f": 3,
+      "judge_f": 5,
+      "human_r": 4,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim and the arithmetic ($29 + 2 * $8 = $43) are directly supported by the context.",
+      "judge_r_reason": "The answer directly calculates the monthly bill based on the Growth plan base price, user limits, and extra user fees provided in the context.",
+      "note": "Inputs supported, arithmetic wrong. Final number unsupported."
+    },
+    {
+      "id": "C11",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 4,
+      "human_b": "abstained",
+      "judge_b": "abstained",
+      "judge_f_reason": "The answer correctly abstains by stating the information is not available in the context.",
+      "judge_r_reason": "The answer correctly abstains from answering since the context does not contain information about payroll.",
+      "note": "Correct abstention."
+    },
+    {
+      "id": "C12",
+      "human_f": 1,
+      "judge_f": 2,
+      "human_r": 5,
+      "judge_r": 1,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The main claim about the exact price of the Enterprise plan being $199 per month is unsupported, as the context states it has custom pricing, though the claim about unlimited users is supported.",
+      "judge_r_reason": "The answer provides a specific price of $199 per month, whereas the context states that the Enterprise plan has custom pricing.",
+      "note": "Invented price. Enterprise is custom pricing. Relevance relabeled 3 to 5 in v2: the rubric scores relevance without regard to accuracy, and the answer directly addresses the question. Accuracy is caught by faithfulness."
+    },
+    {
+      "id": "C13",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 1,
+      "judge_r": 1,
+      "human_b": "abstained",
+      "judge_b": "abstained",
+      "judge_f_reason": "Since the answer only states that the information could not be found, it receives a score of 5 as per the instructions.",
+      "judge_r_reason": "The answer claims the information is not in the help center, but the context clearly states that the Scale plan keeps 365 days of history.",
+      "note": "False abstention. The answer (365 days) is in the context."
+    },
+    {
+      "id": "C14",
+      "human_f": 5,
+      "judge_f": 5,
+      "human_r": 5,
+      "judge_r": 5,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "Every factual claim regarding the user limits and additional user prices is directly supported by the context.",
+      "judge_r_reason": "The answer directly addresses how many users can be added based on the different plans and mentions the option to add more for an extra fee.",
+      "note": "Covers the cases well for an ambiguous question."
+    },
+    {
+      "id": "C15",
+      "human_f": 1,
+      "judge_f": 1,
+      "human_r": 5,
+      "judge_r": 1,
+      "human_b": "answered",
+      "judge_b": "answered",
+      "judge_f_reason": "The context does not mention a Shopify integration or how to connect Ledgerly to Shopify.",
+      "judge_r_reason": "The answer provides instructions for connecting to Shopify, but Shopify is not mentioned in the context as an available integration.",
+      "note": "Invented integration and steps. Relevance relabeled 3 to 5 in v2: the rubric scores relevance without regard to accuracy, and the answer directly addresses the question. Accuracy is caught by faithfulness."
+    }
+  ],
+  "judge_trusted": false
+}
